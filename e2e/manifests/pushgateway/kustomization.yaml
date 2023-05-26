@@ -1,0 +1,7 @@
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+images:
+  - name: quay.io/cybozu/pushgateway
+    newTag: 1.5.1.1
