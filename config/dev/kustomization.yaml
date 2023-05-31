@@ -2,4 +2,3 @@ resources:
   - ../namespace
   - ../rbac
   - ../cronjob
-  - ../pushgateway

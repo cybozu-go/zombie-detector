@@ -16,7 +16,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	appsv1 "k8s.io/api/apps/v1"
-	apiv1 "k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 
@@ -33,7 +32,7 @@ func TestDetectZombieResource(t *testing.T) {
 	}{
 		{
 			name: "No problem Pod",
-			resouce: &apiv1.Pod{
+			resouce: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -50,7 +49,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie below the threshold Pod",
-			resouce: &apiv1.Pod{
+			resouce: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -67,7 +66,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie over the threshold Pod",
-			resouce: &apiv1.Pod{
+			resouce: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -84,7 +83,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie over the threshold Pod with finalizer",
-			resouce: &apiv1.Pod{
+			resouce: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -101,7 +100,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie over the threshold(changed) Pod",
-			resouce: &apiv1.Pod{
+			resouce: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -118,7 +117,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie threshold boundary Pod",
-			resouce: &apiv1.Pod{
+			resouce: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",

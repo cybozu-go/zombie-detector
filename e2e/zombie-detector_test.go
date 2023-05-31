@@ -9,7 +9,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	"k8s.io/apimachinery/pkg/util/json"
 )
@@ -59,7 +59,7 @@ var _ = Describe("zombie-detector e2e test", func() {
 			if err != nil {
 				return err
 			}
-			pod := apiv1.Pod{}
+			pod := corev1.Pod{}
 			err = json.Unmarshal(res, &pod)
 			if err != nil {
 				return err
@@ -77,7 +77,7 @@ var _ = Describe("zombie-detector e2e test", func() {
 			if err != nil {
 				return err
 			}
-			configmap := apiv1.ConfigMap{}
+			configmap := corev1.ConfigMap{}
 			err = json.Unmarshal(res, &configmap)
 			if err != nil {
 				return err

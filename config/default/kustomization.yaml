@@ -1,0 +1,8 @@
+resources:
+  - ../namespace
+  - ../rbac
+  - ../cronjob
+images:
+  - name: zombie-detector:dev
+    newName: ghcr.io/cybozu-go/zombie-detector
+    newTag: 0.0.1

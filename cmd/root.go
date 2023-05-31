@@ -12,7 +12,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
 	"github.com/spf13/cobra"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -92,7 +92,7 @@ func getAllResources(ctx context.Context, config *rest.Config) ([]unstructured.U
 		}
 		for _, resource := range resList.APIResources {
 			groupeResourceDef := schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: resource.Name}
-			listResponse, err := dynamicClient.Resource(groupeResourceDef).Namespace(apiv1.NamespaceAll).List(ctx, metav1.ListOptions{})
+			listResponse, err := dynamicClient.Resource(groupeResourceDef).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 			if err != nil {
 				if strings.Contains(err.Error(), errorFaildtoList) || strings.Contains(err.Error(), errorMethodNotAllowed) {
 					continue
@@ -217,10 +217,7 @@ func rootMain(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	printAllResources(allResources)
-	fmt.Println("---")
 	zombieResources := detectZombieResources(allResources, threshold)
-	printAllResources(zombieResources)
 	err = postZombieResourcesMetrics(zombieResources, pushgatewayEndpointFlag)
 	if err != nil {
 		return err

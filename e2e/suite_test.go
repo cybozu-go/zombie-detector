@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
@@ -33,8 +34,25 @@ var _ = BeforeSuite(func() {
 	_, err = kubectl(nil, "apply", "-f", "./manifests/observer_pod.yaml")
 	Expect(err).NotTo(HaveOccurred())
 
+	By("waiting for observer pod to be started")
+	Eventually(func() error {
+		res, err := kubectl(nil, "get", "pod", "observer-pod", "-n", "monitoring", "-o", "json")
+		if err != nil {
+			return err
+		}
+		pod := corev1.Pod{}
+		err = json.Unmarshal(res, &pod)
+		if err != nil {
+			return err
+		}
+		if pod.Status.Phase == corev1.PodRunning {
+			return fmt.Errorf("observer-pod is not ready yet")
+		}
+		return nil
+	}).Should(Succeed())
+
 	By("applying cronjob manifest")
-	_, err = kubectl(nil, "apply", "-f", "../config/cronjob/cronjob.yaml")
+	_, err = kubectl(nil, "apply", "-f", "./manifests/cronjob.yaml")
 	Expect(err).NotTo(HaveOccurred())
 
 	res, err := kubectl(nil, "get", "cronjob", "zombie-detector-cronjob", "-n", "zombie-detector", "-o", "json")
@@ -60,15 +78,4 @@ var _ = BeforeSuite(func() {
 		}
 		return nil
 	}).Should(Succeed())
-
-})
-
-var _ = AfterSuite(func() {
-	// By("deleting test resources")
-	// _, err := kubectl(nil, "patch", "deployment", "test-deployment", "--patch-file", "./manifests/patch.yaml")
-	// Expect(err).NotTo(HaveOccurred())
-	// _, err = kubectl(nil, "patch", "pod", "test-pod", "--patch-file", "./manifests/patch.yaml")
-	// Expect(err).NotTo(HaveOccurred())
-	// _, err = kubectl(nil, "patch", "configmap", "test-configmap", "--patch-file", "./manifests/patch.yaml")
-	// Expect(err).NotTo(HaveOccurred())
 })

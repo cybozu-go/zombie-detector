@@ -8,10 +8,21 @@ Zombie detector
 Zombie detector is CronJob to detect resources that elapsed for a long time since deletion.
 
 ## Features
-- detect resources who's elapsed time exceeds the threthord
-- informations about detected resources are pushed into Pushgateway  
+- It detects resources that remain undeleted after a certain period with a ```deletionTimestamp```.
+- Information about detected resources are pushed into Pushgateway.
+- We can use this both inside and outside cluster.
 
-## CLI usage
+## Build
+CLI
+```
+go build
+```
+Docker Image
+```
+make docker-build
+```
+
+## Usage
 ```
 Usage:
   zombie-detector [flags]
@@ -28,14 +39,18 @@ Flags:
       --pushgateway string   URL of Pushgateway's endpoint
       --threshold string     threshold of detection (default "24h")
 ```
-example usage
+### example
 
 ```
-zombie-detector --incluster=false --pushgateway=<YOUR PUSHGATEWAY URL> --threshold=24h30m
+zombie-detector --incluster=false --pushgateway=<YOUR PUSHGATEWAY ADDRESS> --threshold=24h30m
 ```
 [releases]: https://github.com/cybozu-go/zombie-detector/releases
 
-## example manifest
+## Example manifest
+We can run zombie-detector periodically as CronJob in a Kubernetes Cluster.
+
+These are example manifests.
+
 conjob.yaml
 ```yaml
 apiVersion: batch/v1

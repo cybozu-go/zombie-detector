@@ -10,6 +10,6 @@ spec:
     runAsUser: 10000
     runAsGroup: 10000
   containers:
-    - name: foo
+    - name: test
       image: quay.io/cybozu/ubuntu:20.04
       command: ["pause"]
