@@ -47,9 +47,14 @@ var _ = BeforeSuite(func() {
 	By("waiting for pushgateway to be started")
 	Eventually(func() error {
 		res, err := kubectl(nil, "get", "deployment", "pushgateway", "-n", "monitoring", "-o", "json")
+		if err != nil {
+			return err
+		}
 		deploy := appsv1.Deployment{}
 		err = json.Unmarshal(res, &deploy)
-		Expect(err).NotTo(HaveOccurred())
+		if err != nil {
+			return err
+		}
 		if deploy.Status.ReadyReplicas == 0 {
 			return fmt.Errorf("pushgateway is not ready yet")
 		}

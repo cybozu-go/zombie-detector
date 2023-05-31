@@ -1,5 +1,6 @@
-# NOTE: kind version is specified at aqua.yaml
 E2ETEST_K8S_VERSION  := 1.26.3
+KIND_VERSION=0.19.0
+
 ARCH ?= amd64
 OS ?= linux
 
@@ -10,9 +11,10 @@ CURL := curl -sSLf
 KUBECTL := $(BIN_DIR)/kubectl
 KUSTOMIZE := $(BIN_DIR)/kustomize
 
-
+KIND := $(BIN_DIR)/kind
 KIND_CLUSTER_NAME := zombie-detector-cluster
 KIND_CONFIG := kind-config.yaml
+
 export KUBECONFIG
 
 .PHONY: help
@@ -26,15 +28,13 @@ help:
 	@echo "stop       Stop the kind cluster"
 
 .PHONY: setup
-setup:
-	mkdir -p $(BIN_DIR)
-	$(CURL) -o $(BIN_DIR)/kubectl https://storage.googleapis.com/kubernetes-release/release/v$(E2ETEST_K8S_VERSION)/bin/$(OS)/$(ARCH)/kubectl && chmod a+x $(BIN_DIR)/kubectl
+setup: bin_dir kubectl kustomize kind 
 
 .PHONY: start
 start:
-	kind create cluster --name=$(KIND_CLUSTER_NAME) --config=$(KIND_CONFIG) --image=kindest/node:v$(E2ETEST_K8S_VERSION) --wait 1m
+	$(KIND) create cluster --name=$(KIND_CLUSTER_NAME) --config=$(KIND_CONFIG) --image=kindest/node:v$(E2ETEST_K8S_VERSION) --wait 1m
 	$(MAKE) -C ../ docker-build
-	kind load docker-image zombie-detector:dev --name=$(KIND_CLUSTER_NAME)
+	$(KIND) load docker-image zombie-detector:dev --name=$(KIND_CLUSTER_NAME)
 	$(KUSTOMIZE) build ../config/namespace | $(KUBECTL) apply -f -
 	$(KUSTOMIZE) build ../config/rbac | $(KUBECTL) apply -f -
 	$(KUSTOMIZE) build ./manifests/pushgateway | $(KUBECTL) apply -f -
@@ -49,18 +49,33 @@ test:
 .PHONY: logs
 logs:
 	rm -rf logs.tar.gz logs
-	kind export logs --name=$(KIND_CLUSTER_NAME) ./logs
+	$(KIND) export logs --name=$(KIND_CLUSTER_NAME) ./logs
 	tar czf logs.tar.gz logs
 	rm -rf logs
 
 .PHONY: stop
 stop: 
-	kind delete cluster --name=$(KIND_CLUSTER_NAME)
+	$(KIND) delete cluster --name=$(KIND_CLUSTER_NAME)
 	-docker image rm zombie-detector:dev
 	-docker image prune -f
 
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
-kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
+kustomize: $(KUSTOMIZE)
 $(KUSTOMIZE): $(BIN_DIR)
-	curl -s $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(BIN_DIR)
+	$(CURL) $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(BIN_DIR)
+
+.PHONY: kind
+kind: $(KIND)
+$(KIND): $(BIN_DIR)
+	$(CURL) -o $(KIND) https://github.com/kubernetes-sigs/kind/releases/download/v$(KIND_VERSION)/kind-$(OS)-$(ARCH)
+	chmod a+x $(KIND)
+
+.PHONY: kubectl
+kubectl: $(KUBECTL)
+$(KUBECTL): $(BIN_DIR)
+	$(CURL) -o $(BIN_DIR)/kubectl https://storage.googleapis.com/kubernetes-release/release/v$(E2ETEST_K8S_VERSION)/bin/$(OS)/$(ARCH)/kubectl && chmod a+x $(BIN_DIR)/kubectl
+
+.PHONY: bin_dir
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)

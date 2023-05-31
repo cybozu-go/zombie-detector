@@ -18,8 +18,7 @@ jobs:
     - uses: actions/setup-go@v4
       with:
         go-version-file: go.mod
-    - run: make kustomize
-    - run: make envtest
+    - run: make setup
     - run: make test
   e2e:
     name: End-to-End Tests
@@ -29,12 +28,7 @@ jobs:
     - uses: actions/setup-go@v4
       with:
         go-version-file: go.mod
-    - uses: aquaproj/aqua-installer@61e2563dfe7674cbf74fe6ec212e444198a3bb00 #v2.0.2
-      with:
-        aqua_version: v1.32.3
     - run: make setup
-      working-directory: e2e
-    - run: make kustomize
       working-directory: e2e
     - run: make start 
       working-directory: e2e

@@ -56,20 +56,32 @@ var _ = Describe("zombie-detector e2e test", func() {
 		By("waiting for time passing since deletionTimestamp is added")
 		Eventually(func() error {
 			res, err := kubectl(nil, "get", "pod", "test-pod", "-n", "default", "-o", "json")
-			Expect(err).NotTo(HaveOccurred())
+			if err != nil {
+				return err
+			}
 			pod := apiv1.Pod{}
 			err = json.Unmarshal(res, &pod)
-
+			if err != nil {
+				return err
+			}
 			res, err = kubectl(nil, "get", "deployment", "test-deployment", "-n", "default", "-o", "json")
-			Expect(err).NotTo(HaveOccurred())
+			if err != nil {
+				return err
+			}
 			deploy := appsv1.Deployment{}
 			err = json.Unmarshal(res, &deploy)
-
+			if err != nil {
+				return err
+			}
 			res, err = kubectl(nil, "get", "configmap", "test-configmap", "-n", "default", "-o", "json")
-			Expect(err).NotTo(HaveOccurred())
+			if err != nil {
+				return err
+			}
 			configmap := apiv1.ConfigMap{}
 			err = json.Unmarshal(res, &configmap)
-
+			if err != nil {
+				return err
+			}
 			if time.Since(pod.GetDeletionTimestamp().Time).Seconds() < 5 || time.Since(deploy.GetDeletionTimestamp().Time).Seconds() < 5 || time.Since(configmap.GetDeletionTimestamp().Time).Seconds() < 5 {
 				return fmt.Errorf("at least one resource is not deleted yet")
 			}
@@ -110,6 +122,23 @@ var _ = Describe("zombie-detector e2e test", func() {
 		_, err = kubectl(nil, "patch", "configmap", "test-configmap", "--patch-file", "./manifests/patch.yaml")
 		Expect(err).NotTo(HaveOccurred())
 
+		By("check resources are completely deleted")
+		Eventually(func() error {
+			_, err := kubectl(nil, "get", "pod", "test-pod", "-n", "default")
+			if err == nil { //kubectl returns error when resource does not exists.
+				return fmt.Errorf("pod is not deleted yet")
+			}
+			_, err = kubectl(nil, "get", "deployment", "test-deployment", "-n", "default")
+			if err == nil {
+				return fmt.Errorf("pod is not deleted yet")
+			}
+			_, err = kubectl(nil, "get", "pod", "test-configmap", "-n", "default")
+			if err == nil {
+				return fmt.Errorf("pod is not deleted yet")
+			}
+			return nil
+		}).Should(Succeed())
+
 		By("creating job from cronjob")
 		_, err = kubectl(nil, "create", "job", "zombie-detector-immediate-job", "-n", "zombie-detector", "--from=cronjob/zombie-detector-cronjob")
 		Expect(err).NotTo(HaveOccurred())
@@ -117,6 +146,9 @@ var _ = Describe("zombie-detector e2e test", func() {
 		By("waiting for job to be completed")
 		Eventually(func() error {
 			res, err := kubectl(nil, "get", "job", "zombie-detector-immediate-job", "-n", "zombie-detector", "-o", "json")
+			if err != nil {
+				return err
+			}
 			job := batchv1.Job{}
 			err = json.Unmarshal(res, &job)
 			if err != nil {
@@ -127,6 +159,7 @@ var _ = Describe("zombie-detector e2e test", func() {
 			}
 			return nil
 		}).Should(Succeed())
+
 		By("checking metrics is empty")
 		res, err := getMetricsFromPushgateway()
 		Expect(err).NotTo(HaveOccurred())
@@ -178,6 +211,6 @@ type Response struct {
 				} `json:"labels"`
 				Value string `json:"value"`
 			} `json:"metrics"`
-		} `json:"zombie_duration_hours"`
+		} `json:"zombie_duration_hours,omitempty"`
 	} `json:"data"`
 }
