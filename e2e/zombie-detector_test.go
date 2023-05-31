@@ -6,7 +6,11 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
+
+	apiv1 "k8s.io/api/core/v1"
+
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
@@ -39,6 +43,7 @@ var _ = Describe("zombie-detector e2e test", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(res.Data).To(BeEmpty())
 	})
+
 	It("should detect zombie resouces", func() {
 		By("adding deletionTimestamp to resouces")
 		_, err := kubectl(nil, "delete", "deployment", "test-deployment", "-n", "default", "--wait=false")
@@ -47,6 +52,29 @@ var _ = Describe("zombie-detector e2e test", func() {
 		Expect(err).NotTo(HaveOccurred())
 		_, err = kubectl(nil, "delete", "configmap", "test-configmap", "-n", "default", "--wait=false")
 		Expect(err).NotTo(HaveOccurred())
+
+		By("waiting for time passing since deletionTimestamp is added")
+		Eventually(func() error {
+			res, err := kubectl(nil, "get", "pod", "test-pod", "-n", "default", "-o", "json")
+			Expect(err).NotTo(HaveOccurred())
+			pod := apiv1.Pod{}
+			err = json.Unmarshal(res, &pod)
+
+			res, err = kubectl(nil, "get", "deployment", "test-deployment", "-n", "default", "-o", "json")
+			Expect(err).NotTo(HaveOccurred())
+			deploy := appsv1.Deployment{}
+			err = json.Unmarshal(res, &deploy)
+
+			res, err = kubectl(nil, "get", "configmap", "test-configmap", "-n", "default", "-o", "json")
+			Expect(err).NotTo(HaveOccurred())
+			configmap := apiv1.ConfigMap{}
+			err = json.Unmarshal(res, &configmap)
+
+			if time.Since(pod.GetDeletionTimestamp().Time).Seconds() < 5 || time.Since(deploy.GetDeletionTimestamp().Time).Seconds() < 5 || time.Since(configmap.GetDeletionTimestamp().Time).Seconds() < 5 {
+				return fmt.Errorf("at least one resource is not deleted yet")
+			}
+			return nil
+		}).Should(Succeed())
 
 		By("creating job from cronjob")
 		_, err = kubectl(nil, "create", "job", "zombie-detector-immediate-job", "-n", "zombie-detector", "--from=cronjob/zombie-detector-cronjob")
@@ -74,7 +102,7 @@ var _ = Describe("zombie-detector e2e test", func() {
 	})
 
 	It("should not detect anything again", func() {
-		By("deleting test resources")
+		By("deleting test resources by deleting finalizers")
 		_, err := kubectl(nil, "patch", "deployment", "test-deployment", "--patch-file", "./manifests/patch.yaml")
 		Expect(err).NotTo(HaveOccurred())
 		_, err = kubectl(nil, "patch", "pod", "test-pod", "--patch-file", "./manifests/patch.yaml")

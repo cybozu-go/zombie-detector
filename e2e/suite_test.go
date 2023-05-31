@@ -59,11 +59,11 @@ var _ = BeforeSuite(func() {
 })
 
 var _ = AfterSuite(func() {
-	By("deleting test resources")
-	_, err := kubectl(nil, "patch", "deployment", "test-deployment", "--patch-file", "./manifests/patch.yaml")
-	Expect(err).NotTo(HaveOccurred())
-	_, err = kubectl(nil, "patch", "pod", "test-pod", "--patch-file", "./manifests/patch.yaml")
-	Expect(err).NotTo(HaveOccurred())
-	_, err = kubectl(nil, "patch", "configmap", "test-configmap", "--patch-file", "./manifests/patch.yaml")
-	Expect(err).NotTo(HaveOccurred())
+	// By("deleting test resources")
+	// _, err := kubectl(nil, "patch", "deployment", "test-deployment", "--patch-file", "./manifests/patch.yaml")
+	// Expect(err).NotTo(HaveOccurred())
+	// _, err = kubectl(nil, "patch", "pod", "test-pod", "--patch-file", "./manifests/patch.yaml")
+	// Expect(err).NotTo(HaveOccurred())
+	// _, err = kubectl(nil, "patch", "configmap", "test-configmap", "--patch-file", "./manifests/patch.yaml")
+	// Expect(err).NotTo(HaveOccurred())
 })

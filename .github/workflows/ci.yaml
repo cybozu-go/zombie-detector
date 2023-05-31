@@ -3,16 +3,40 @@ on:
   pull_request:
   push:
     branches:
-    - 'main'
-env:
-  go-version: "1.20"
+    - 'develop'
 jobs:
-  test:
-    name: Small tests
+  build:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-go@v3
+    - run: make docker-build
+  test:
+    name: Unit tests
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v4
       with:
-        go-version: ${{ env.go-version }}
+        go-version-file: go.mod
+    - run: make kustomize
+    - run: make envtest
     - run: make test
+  e2e:
+    name: End-to-End Tests
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v4
+      with:
+        go-version-file: go.mod
+    - uses: aquaproj/aqua-installer@61e2563dfe7674cbf74fe6ec212e444198a3bb00 #v2.0.2
+      with:
+        aqua_version: v1.32.3
+    - run: make setup
+      working-directory: e2e
+    - run: make kustomize
+      working-directory: e2e
+    - run: make start 
+      working-directory: e2e
+    - run: make test
+      working-directory: e2e

@@ -15,6 +15,6 @@ spec:
             image: zombie-detector:dev
             command:
             - ./zombie-detector
-            - --threshold=5s
+            - --threshold=1s
             - --pushgateway=http://pushgateway.monitoring.svc.cluster.local:9091
           restartPolicy: OnFailure
