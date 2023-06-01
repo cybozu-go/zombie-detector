@@ -19,10 +19,11 @@ COPY main.go main.go
 # Build
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o zombie-detector main.go
 
-FROM quay.io/cybozu/ubuntu:22.04
+# FROM quay.io/cybozu/ubuntu:22.04
+FROM scratch
 LABEL org.opencontainers.image.source https://github.com/cybozu-go/zombie-detector
 
 WORKDIR /
-COPY --from=builder /workspace/zombie-detector /usr/local/bin
+COPY --from=builder /workspace/zombie-detector .
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/zombie-detector"]
