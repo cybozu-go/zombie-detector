@@ -23,6 +23,6 @@ FROM quay.io/cybozu/ubuntu:22.04
 LABEL org.opencontainers.image.source https://github.com/cybozu-go/zombie-detector
 
 WORKDIR /
-COPY --from=builder /workspace/zombie-detector .
+COPY --from=builder /workspace/zombie-detector /usr/local/bin
 
 ENTRYPOINT ["/bin/bash"]
