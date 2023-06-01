@@ -9,7 +9,7 @@ Zombie detector is CronJob to detect resources that elapsed for a long time sinc
 
 ## Features
 - It detects resources that remain undeleted after a certain period with a ```deletionTimestamp```.
-- Information about detected resources are pushed into Pushgateway.
+- Information about detected resources are pushed into [Pushgateway](https://github.com/prometheus/pushgateway).
 - We can use this both inside and outside cluster.
 
 ## Build
@@ -51,7 +51,7 @@ We can run zombie-detector periodically as CronJob in a Kubernetes Cluster.
 
 These are example manifests.
 
-conjob.yaml
+cronjob.yaml
 ```yaml
 apiVersion: batch/v1
 kind: CronJob
