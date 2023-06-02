@@ -5,11 +5,18 @@
 
 Zombie detector
 ============================
-Zombie detector is a CronJob to detect resources that remain for a long time after deletion reqeuest.
+Zombie detector is a tool to detect Kubernetes resources that remain for a long time after deletion request.
+
+## Background
+In Kubernetes, there are cases where you request the deletion of resources and it remains undeleted. (For example, failing to remove the finalizer or a bug in the Operator).
+Such resources that remain undeleted (we call them zombie resources) can cause problems, so we want to detect them.
+
+When the zombie-detector detects zombie resources, it sends information to a monitoring system such as Prometheus via Pushgateway.
+This will allow us to check the status of zombie resources on the dashboard and can make alerts.
 
 ## Features
 - It detects resources that remain undeleted after a certain period with a ```deletionTimestamp```.
-- Elapsed time from deletion request and metadatas of resources are pushed into [Pushgateway](https://github.com/prometheus/pushgateway).
+- Elapsed time from deletion request and metadata of resources are pushed into [Pushgateway](https://github.com/prometheus/pushgateway).
 - We can use this both inside and outside cluster.
 
 ## Build
@@ -26,18 +33,13 @@ make docker-build
 ```
 Usage:
   zombie-detector [flags]
-  zombie-detector [command]
-
-Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  help        Help about any command
-  version     Show the version of zombie-detector
 
 Flags:
   -h, --help                 help for zombie-detector
-      --incluster            execute in cluster or not (default true)
       --pushgateway string   URL of Pushgateway's endpoint
-      --threshold string     threshold of detection (default "24h")
+      --threshold duration   threshold of detection (default 24h0m0s)
+  -v, --version              version for zombie-detector
+
 ```
 ### example
 
