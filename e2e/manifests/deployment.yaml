@@ -16,5 +16,5 @@ spec:
     spec:
       containers:
       - name: test
-        image: quay.io/cybozu/ubuntu:20.04
+        image: quay.io/cybozu/ubuntu:22.04
         command: ["pause"]

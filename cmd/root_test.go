@@ -10,29 +10,27 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
-
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func TestDetectZombieResource(t *testing.T) {
 	t.Parallel()
 	for _, tt := range []struct {
 		name           string
-		resouce        runtime.Object
+		resource       runtime.Object
 		thresholdHours string
 		want           bool
 	}{
 		{
 			name: "No problem Pod",
-			resouce: &corev1.Pod{
+			resource: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -49,7 +47,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie below the threshold Pod",
-			resouce: &corev1.Pod{
+			resource: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -66,7 +64,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie over the threshold Pod",
-			resouce: &corev1.Pod{
+			resource: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -83,7 +81,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie over the threshold Pod with finalizer",
-			resouce: &corev1.Pod{
+			resource: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -100,7 +98,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie over the threshold(changed) Pod",
-			resouce: &corev1.Pod{
+			resource: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -117,7 +115,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie threshold boundary Pod",
-			resouce: &corev1.Pod{
+			resource: &corev1.Pod{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Pod",
 					APIVersion: "v1",
@@ -134,7 +132,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "No problem Deployment",
-			resouce: &appsv1.Deployment{
+			resource: &appsv1.Deployment{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Deoloyment",
 					APIVersion: "apps/v1",
@@ -151,7 +149,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie below the threshold Deployment",
-			resouce: &appsv1.Deployment{
+			resource: &appsv1.Deployment{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Deoloyment",
 					APIVersion: "apps/v1",
@@ -168,7 +166,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie over the threshold Deployment",
-			resouce: &appsv1.Deployment{
+			resource: &appsv1.Deployment{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "Deoloyment",
 					APIVersion: "apps/v1",
@@ -185,7 +183,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "No problem ConfigMap",
-			resouce: &v1.ConfigMap{
+			resource: &v1.ConfigMap{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "ConfigMap",
 					APIVersion: "v1",
@@ -202,7 +200,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie below the threshold ConfigMap",
-			resouce: &v1.ConfigMap{
+			resource: &v1.ConfigMap{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "ConfigMap",
 					APIVersion: "v1",
@@ -219,7 +217,7 @@ func TestDetectZombieResource(t *testing.T) {
 		},
 		{
 			name: "Zombie over the threshold Deployment",
-			resouce: &v1.ConfigMap{
+			resource: &v1.ConfigMap{
 				TypeMeta: metav1.TypeMeta{
 					Kind:       "ConfigMap",
 					APIVersion: "v1",
@@ -237,7 +235,7 @@ func TestDetectZombieResource(t *testing.T) {
 	} {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(tt.resouce)
+			obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(tt.resource)
 			require.NoError(t, err)
 			unstructuredObj := unstructured.Unstructured{
 				Object: obj,
@@ -278,7 +276,7 @@ var _ = Describe("Test zombie-detector", func() {
 		By("checking deletionTimestamp")
 		checkZombie := func(resource client.Object) error {
 			if resource.GetDeletionTimestamp() == nil {
-				return fmt.Errorf("resouce must have deletionTimestamp")
+				return fmt.Errorf("resource must have deletionTimestamp")
 			}
 			if time.Since(resource.GetDeletionTimestamp().Time) < testThreshold {
 				return fmt.Errorf("it should wait to pass the threshold time")

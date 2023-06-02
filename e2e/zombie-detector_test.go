@@ -8,9 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
-
 	corev1 "k8s.io/api/core/v1"
-
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
@@ -44,8 +42,8 @@ var _ = Describe("zombie-detector e2e test", func() {
 		Expect(res.Data).To(BeEmpty())
 	})
 
-	It("should detect zombie resouces", func() {
-		By("adding deletionTimestamp to resouces")
+	It("should detect zombie resources", func() {
+		By("adding deletionTimestamp to resources")
 		_, err := kubectl(nil, "delete", "deployment", "test-deployment", "-n", "default", "--wait=false")
 		Expect(err).NotTo(HaveOccurred())
 		_, err = kubectl(nil, "delete", "pod", "test-pod", "-n", "default", "--wait=false")
@@ -177,8 +175,8 @@ func getMetricsFromPushgateway() (*Response, error) {
 	if err := json.Unmarshal(res, &response); err != nil {
 		return nil, err
 	}
-	if response.Staus != "success" {
-		return nil, fmt.Errorf("unexpected status: %s", response.Staus)
+	if response.Status != "success" {
+		return nil, fmt.Errorf("unexpected status: %s", response.Status)
 	}
 	return response, nil
 }
@@ -193,8 +191,8 @@ func returnZombieDetectorMetricsIndex(res Response) (int, error) {
 }
 
 type Response struct {
-	Staus string `json:"status"`
-	Data  []struct {
+	Status string `json:"status"`
+	Data   []struct {
 		Labels struct {
 			Job string `json:"job"`
 		} `json:"labels"`
