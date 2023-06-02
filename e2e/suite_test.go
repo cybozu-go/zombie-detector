@@ -45,7 +45,7 @@ var _ = BeforeSuite(func() {
 		if err != nil {
 			return err
 		}
-		if pod.Status.Phase == corev1.PodRunning {
+		if pod.Status.Phase != corev1.PodRunning {
 			return fmt.Errorf("observer-pod is not ready yet")
 		}
 		return nil
