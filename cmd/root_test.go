@@ -134,7 +134,7 @@ func TestDetectZombieResource(t *testing.T) {
 			name: "No problem Deployment",
 			resource: &appsv1.Deployment{
 				TypeMeta: metav1.TypeMeta{
-					Kind:       "Deoloyment",
+					Kind:       "Deployment",
 					APIVersion: "apps/v1",
 				},
 				ObjectMeta: metav1.ObjectMeta{
