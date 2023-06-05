@@ -154,7 +154,6 @@ func postZombieResourcesMetrics(zombieResources []unstructured.Unstructured, end
 }
 
 func rootMain(cmd *cobra.Command, args []string) error {
-
 	config, err := config.GetConfig()
 	if err != nil {
 		return err
