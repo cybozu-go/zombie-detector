@@ -3,10 +3,11 @@ package cmd
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
+	"os"
 	"time"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
 	"github.com/spf13/cobra"
@@ -35,8 +36,8 @@ var pushgatewayEndpointFlag string
 
 func init() {
 	rootCmd.Flags().DurationVar(&thresholdFlag, "threshold", time.Duration(24*time.Hour), "threshold of detection")
-	rootCmd.Flags().StringVar(&pushgatewayEndpointFlag, "pushgateway", "", "URL of Pushgateway's endpoint")
-
+	rootCmd.MarkFlagRequired("threshold")
+	rootCmd.Flags().StringVar(&pushgatewayEndpointFlag, "pushgateway", "", "URL of Pushgateway's endpoint. If this flag is not given, the result outputs to stdout")
 }
 
 func Execute() {
@@ -81,14 +82,29 @@ func getAllResources(ctx context.Context, config *rest.Config) ([]unstructured.U
 }
 
 func printAllResources(resources []unstructured.Unstructured) {
+	data := make([][]string, 0, len(resources))
 	for _, res := range resources {
 		apiVersion := res.GetAPIVersion()
 		kind := res.GetKind()
 		name := res.GetName()
 		namespace := res.GetNamespace()
 		deletionTimestamp := res.GetDeletionTimestamp()
-		fmt.Printf("%s, %s, %s,%s %v\n", apiVersion, kind, name, namespace, deletionTimestamp)
+		data = append(data, []string{apiVersion, kind, name, namespace, deletionTimestamp.String()})
 	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Version", "Kind", "Name", "Namespace", "Timestamp"})
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("")
+	table.SetHeaderLine(false)
+	table.SetTablePadding("\t")
+	table.SetNoWhiteSpace(true)
+	table.AppendBulk(data)
+	table.Render()
 }
 
 func detectZombieResource(resource unstructured.Unstructured, threshold time.Duration) bool {
@@ -164,6 +180,11 @@ func rootMain(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	zombieResources := detectZombieResources(allResources, thresholdFlag)
+
+	if pushgatewayEndpointFlag == "" {
+		printAllResources(zombieResources)
+		return nil
+	}
 	err = postZombieResourcesMetrics(zombieResources, pushgatewayEndpointFlag)
 	if err != nil {
 		return err

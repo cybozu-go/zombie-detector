@@ -9,6 +9,9 @@ spec:
     spec:
       template:
         spec:
+          securityContext:
+            runAsUser: 10000
+            runAsGroup: 10000
           serviceAccountName: zombie-detector-sa
           containers:
           - name: zombie-detector

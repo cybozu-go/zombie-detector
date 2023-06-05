@@ -38,10 +38,9 @@ Usage:
 
 Flags:
   -h, --help                 help for zombie-detector
-      --pushgateway string   URL of Pushgateway's endpoint
+      --pushgateway string   URL of Pushgateway's endpoint. If this flag is not given, the result outputs to stdout
       --threshold duration   threshold of detection (default 24h0m0s)
   -v, --version              version for zombie-detector
-
 ```
 ### example
 
