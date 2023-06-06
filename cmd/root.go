@@ -14,7 +14,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
@@ -46,7 +45,15 @@ func Execute() {
 	}
 }
 
-func getAllResources(ctx context.Context, config *rest.Config) ([]unstructured.Unstructured, error) {
+type resourceMetadata struct {
+	version           string
+	kind              string
+	name              string
+	namespace         string
+	deletionTimestamp *metav1.Time
+}
+
+func getAllResources(ctx context.Context, config *rest.Config) ([]resourceMetadata, error) {
 	o, err := discovery.NewDiscoveryClientForConfig(config)
 	if err != nil {
 		return nil, err
@@ -59,7 +66,7 @@ func getAllResources(ctx context.Context, config *rest.Config) ([]unstructured.U
 	if err != nil {
 		return nil, err
 	}
-	resources := make([]unstructured.Unstructured, 0)
+	resources := make([]resourceMetadata, 0)
 	for _, resList := range serverResources {
 		gv, err := schema.ParseGroupVersion(resList.GroupVersion)
 		if err != nil {
@@ -75,21 +82,24 @@ func getAllResources(ctx context.Context, config *rest.Config) ([]unstructured.U
 			if statusErr.ErrStatus.Reason == metav1.StatusReasonNotFound || statusErr.ErrStatus.Reason == metav1.StatusReasonMethodNotAllowed {
 				continue
 			}
-			resources = append(resources, listResponse.Items...)
+			for _, item := range listResponse.Items {
+				resources = append(resources, resourceMetadata{
+					version:           item.GetAPIVersion(),
+					kind:              item.GetKind(),
+					name:              item.GetName(),
+					namespace:         item.GetNamespace(),
+					deletionTimestamp: item.GetDeletionTimestamp(),
+				})
+			}
 		}
 	}
 	return resources, nil
 }
 
-func printAllResources(resources []unstructured.Unstructured) {
+func printAllResources(resources []resourceMetadata) {
 	data := make([][]string, 0, len(resources))
 	for _, res := range resources {
-		apiVersion := res.GetAPIVersion()
-		kind := res.GetKind()
-		name := res.GetName()
-		namespace := res.GetNamespace()
-		deletionTimestamp := res.GetDeletionTimestamp()
-		data = append(data, []string{apiVersion, kind, name, namespace, deletionTimestamp.String()})
+		data = append(data, []string{res.version, res.kind, res.name, res.namespace, res.deletionTimestamp.String()})
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Version", "Kind", "Name", "Namespace", "Timestamp"})
@@ -107,19 +117,18 @@ func printAllResources(resources []unstructured.Unstructured) {
 	table.Render()
 }
 
-func detectZombieResource(resource unstructured.Unstructured, threshold time.Duration) bool {
-	deletionTimestamp := resource.GetDeletionTimestamp()
-	if deletionTimestamp == nil {
+func detectZombieResource(resource resourceMetadata, threshold time.Duration) bool {
+	if resource.deletionTimestamp == nil {
 		return false
 	}
-	if time.Since(deletionTimestamp.Time) > threshold {
+	if time.Since(resource.deletionTimestamp.Time) > threshold {
 		return true
 	}
 	return false
 }
 
-func detectZombieResources(resources []unstructured.Unstructured, threshold time.Duration) []unstructured.Unstructured {
-	zombieResources := make([]unstructured.Unstructured, 0)
+func detectZombieResources(resources []resourceMetadata, threshold time.Duration) []resourceMetadata {
+	zombieResources := make([]resourceMetadata, 0)
 	for _, res := range resources {
 		isZombie := detectZombieResource(res, threshold)
 		if isZombie {
@@ -129,7 +138,7 @@ func detectZombieResources(resources []unstructured.Unstructured, threshold time
 	return zombieResources
 }
 
-func postZombieResourcesMetrics(zombieResources []unstructured.Unstructured, endpoint string) error {
+func postZombieResourcesMetrics(zombieResources []resourceMetadata, endpoint string) error {
 	err := push.New(endpoint, "zombie-detector").Delete()
 	if err != nil {
 		return err
@@ -139,23 +148,18 @@ func postZombieResourcesMetrics(zombieResources []unstructured.Unstructured, end
 	}
 	gauges := make([]prometheus.Gauge, 0)
 	for _, res := range zombieResources {
-		apiVersion := res.GetAPIVersion()
-		kind := res.GetKind()
-		name := res.GetName()
-		namespace := res.GetNamespace()
 		gauge := prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "zombie_duration_hours",
 			Help: "zombie detector zombie duration",
 			ConstLabels: map[string]string{
-				"apiVersion": apiVersion,
-				"kind":       kind,
-				"name":       name,
-				"namespace":  namespace,
+				"apiVersion": res.version,
+				"kind":       res.kind,
+				"name":       res.name,
+				"namespace":  res.namespace,
 				"updated_at": time.Now().Format(time.RFC3339),
 			},
 		})
-		deletionTimestamp := res.GetDeletionTimestamp()
-		gauge.Set(time.Since(deletionTimestamp.Time).Seconds())
+		gauge.Set(time.Since(res.deletionTimestamp.Time).Seconds())
 		gauges = append(gauges, gauge)
 	}
 	registry := prometheus.NewRegistry()

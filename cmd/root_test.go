@@ -240,10 +240,17 @@ func TestDetectZombieResource(t *testing.T) {
 			unstructuredObj := unstructured.Unstructured{
 				Object: obj,
 			}
+			resource := resourceMetadata{
+				version:           unstructuredObj.GetAPIVersion(),
+				kind:              unstructuredObj.GetKind(),
+				name:              unstructuredObj.GetName(),
+				namespace:         unstructuredObj.GetNamespace(),
+				deletionTimestamp: unstructuredObj.GetDeletionTimestamp(),
+			}
 			threshold, err := time.ParseDuration(tt.thresholdHours)
 			require.NoError(t, err)
 
-			r := detectZombieResource(unstructuredObj, threshold)
+			r := detectZombieResource(resource, threshold)
 			assert.Equal(t, tt.want, r)
 		})
 	}
@@ -319,11 +326,25 @@ var _ = Describe("Test zombie-detector", func() {
 		Expect(len(zombieResources)).To(Equal(2))
 
 		By("checking finalizers and deletionTimestamp exist")
-		for _, res := range zombieResources {
-			finalizers := res.GetFinalizers()
+		testPod = corev1.Pod{}
+		testConfigMap = v1.ConfigMap{}
+		expectedObj := map[types.NamespacedName]client.Object{
+			resources[0]: &testPod,
+			resources[1]: &testConfigMap,
+		}
+
+		for i := 0; i < len(zombieResources); i++ {
+			namespacedName := types.NamespacedName{Name: zombieResources[i].name, Namespace: zombieResources[i].namespace}
+			err := k8sClient.Get(ctx, namespacedName, expectedObj[namespacedName])
+			Expect(err).NotTo(HaveOccurred())
+
+			obj, ok := expectedObj[namespacedName]
+			Expect(ok).To(BeTrue())
+			finalizers := obj.GetFinalizers()
 			Expect(finalizers).NotTo(BeEmpty())
-			deletionTimestamp := res.GetDeletionTimestamp()
-			Expect(deletionTimestamp).NotTo(BeNil())
+
+			Expect(obj.GetDeletionTimestamp()).NotTo(BeNil())
+			Expect(zombieResources[i].deletionTimestamp).NotTo(BeNil())
 		}
 	})
 })
