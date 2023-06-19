@@ -84,24 +84,12 @@ $(BIN_DIR):
 
 .PHONY: update-tools-version
 update-tools-version: login-gh
-	$(call get-latest-gh,actions/cache)
-	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2); \
-	sed -i -e "s/ACTIONS_CACHE_VERSION := .*/ACTIONS_CACHE_VERSION := $${NEW_VERSION}/g" Makefile.versions
-
-	$(call get-latest-gh,actions/checkout)
-	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2); \
-	sed -i -e "s/ACTIONS_CHECKOUT_VERSION := .*/ACTIONS_CHECKOUT_VERSION := $${NEW_VERSION}/g" Makefile.versions
-
-	$(call get-latest-gh,actions/setup-go)
-	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2); \
-	sed -i -e "s/ACTIONS_SETUP_GO_VERSION := .*/ACTIONS_SETUP_GO_VERSION := $${NEW_VERSION}/g" Makefile.versions
-
 	$(call get-latest-gh,kubernetes-sigs/kind)
 	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2-); \
 	sed -i -e "s/KIND_VERSION := .*/KIND_VERSION := $${NEW_VERSION}/g" Makefile.versions
 
 	$(call get-latest-gh,kubernetes-sigs/kustomize)
-	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2-); \
+	NEW_VERSION=$$(echo $(notdir $(latest_gh)) | cut -b 2-); \
 	sed -i -e "s/KUSTOMIZE_VERSION := .*/KUSTOMIZE_VERSION := $${NEW_VERSION}/g" Makefile.versions
 
 	$(call get-latest-gh,mikefarah/yq)
@@ -109,7 +97,7 @@ update-tools-version: login-gh
 	sed -i -e "s/YQ_VERSION := .*/YQ_VERSION := $${NEW_VERSION}/g" Makefile.versions
 
 	$(call get-latest-tag,pushgateway)
-	NEW_VERSION=$$(docker run quay.io/cybozu/pushgateway:$(latest_tag) kustomize version | grep -o -e 'Version:[^ ]*' | cut -d'/' -f2 | cut -b 2-); \
+	NEW_VERSION=$$(echo $(latest_tag)); \
 	sed -i -e "s/PUSHGATEWAY_IMAGE_VERSION := .*/PUSHGATEWAY_IMAGE_VERSION := $${NEW_VERSION}/g" Makefile.versions
 
 # usage: get-latest-tag NAME
@@ -122,8 +110,9 @@ define get-latest-gh
 $(eval latest_gh := $(shell $(GH) release list --repo $1 | grep Latest | cut -f3))
 endef
 
-$(GH):
-	mkdir -p $(BIN_DIR)
+.PHONY: gh
+gh: $(GH)
+$(GH): $(BIN_DIR)
 	wget -qO - https://github.com/cli/cli/releases/download/v$(GH_VERSION)/gh_$(GH_VERSION)_$(OS)_$(ARCH).tar.gz | tar -zx -O gh_$(GH_VERSION)_$(OS)_$(ARCH)/bin/gh > $@
 	chmod +x $@
 
@@ -136,12 +125,6 @@ login-gh:
 		$(GH) auth login -h github.com -p HTTPS -w; \
 	fi
 
-
 .PHONY: logout-gh
 logout-gh:
 	$(GH) auth logout
-
-$(YQ):
-	mkdir -p $(BIN_DIR)
-	wget -qO $@ https://github.com/mikefarah/yq/releases/download/v$(YQ_VERSION)/yq_$(OS)_$(ARCH)
-	chmod +x $@

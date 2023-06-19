@@ -15,7 +15,7 @@ This page describes how to update zombie-detector regularly.
 ## Kubernetes Update
 
 1. Update `go.mod`.
-2. Update `ENVTEST_K8S_VERSION` in `Makefile`.  
+2. Update `ENVTEST_K8S_VERSION` in `Makefile.versions` and `e2e/Makefile.versions`.  
    ```console
    $ # Use this command to list the available k8s versions for envtest
    $ ./bin/setup-envtest list
