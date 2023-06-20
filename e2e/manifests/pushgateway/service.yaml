@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: pushgateway
+  namespace: monitoring
+spec:
+  selector:
+    app.kubernetes.io/name: pushgateway
+  ports:
+  - name: pushgateway
+    port: 9091
+    targetPort: 9091

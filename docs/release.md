@@ -44,16 +44,20 @@ It should look like:
     $ git neco dev "bump-$VERSION"
     ```
 
-3. Edit `CHANGELOG.md` for the new version ([example][]).
-4. Commit the change and push it.
+3. Update files listed below for the new version.
+  - [cmd/root.go](../cmd/root.go)
+  - [config/default/kustomization.yaml](../config/default/kustomization.yaml)
+  
+4. Edit `CHANGELOG.md` for the new version ([example][]).
+5. Commit the change and push it.
 
     ```console
     $ git commit -a -m "Bump version to $VERSION"
     $ git neco review
     ```
 
-5. Merge this branch.
-6. Add a git tag to the main HEAD, then push it.
+6. Merge this branch.
+7. Add a git tag to the main HEAD, then push it.
 
     ```console
     # Set VERSION again.

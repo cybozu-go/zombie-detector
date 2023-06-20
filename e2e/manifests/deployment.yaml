@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+  finalizers:
+    - kubernetes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-pod-deployment
+  template:
+    metadata:
+      labels:
+        app: test-pod-deployment
+    spec:
+      containers:
+      - name: test
+        image: quay.io/cybozu/ubuntu:22.04
+        command: ["pause"]

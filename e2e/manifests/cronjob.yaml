@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: zombie-detector-cronjob
+  namespace: zombie-detector
+spec:
+  schedule: "0 0 */1 * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsUser: 10000
+            runAsGroup: 10000
+          serviceAccountName: zombie-detector-sa
+          containers:
+          - name: zombie-detector
+            image: zombie-detector:dev
+            command:
+            - /zombie-detector
+            - --threshold=1s
+            - --pushgateway=http://pushgateway.monitoring.svc:9091
+          restartPolicy: OnFailure

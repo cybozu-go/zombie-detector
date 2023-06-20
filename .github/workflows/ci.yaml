@@ -3,16 +3,34 @@ on:
   pull_request:
   push:
     branches:
-    - 'main'
-env:
-  go-version: "1.20"
+      - 'main'
 jobs:
-  test:
-    name: Small tests
+  build:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-go@v3
-      with:
-        go-version: ${{ env.go-version }}
-    - run: make test
+      - uses: actions/checkout@v3
+      - run: make docker-build
+  test:
+    name: Unit tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+      - run: make setup
+      - run: make test
+  e2e:
+    name: End-to-End Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+      - run: make setup
+        working-directory: e2e
+      - run: make start
+        working-directory: e2e
+      - run: make test
+        working-directory: e2e
