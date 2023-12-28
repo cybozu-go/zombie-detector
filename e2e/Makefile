@@ -96,18 +96,18 @@ update-tools-version: login-gh
 	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2-); \
 	sed -i -e "s/YQ_VERSION := .*/YQ_VERSION := $${NEW_VERSION}/g" Makefile.versions
 
-	$(call get-latest-tag,pushgateway)
+	$(call get-latest-gh-package-tag,pushgateway)
 	NEW_VERSION=$$(echo $(latest_tag)); \
 	sed -i -e "s/PUSHGATEWAY_IMAGE_VERSION := .*/PUSHGATEWAY_IMAGE_VERSION := $${NEW_VERSION}/g" Makefile.versions
-
-# usage: get-latest-tag NAME
-define get-latest-tag
-$(eval latest_tag := $(shell wget -O - https://quay.io/api/v1/repository/cybozu/$1/tag/ | jq -r '.tags[] | .name' | awk '/.*\..*\./ {print $$1; exit}'))
-endef
 
 # usage get-latest-gh OWNER/REPO
 define get-latest-gh
 $(eval latest_gh := $(shell $(GH) release list --repo $1 | grep Latest | cut -f3))
+endef
+
+# usage: get-latest-gh-package-tag NAME
+define get-latest-gh-package-tag
+$(eval latest_tag := $(shell curl -sSf -H "Authorization: Bearer $(shell curl -sSf "https://ghcr.io/token?scope=repository%3Acybozu%2F$1%3Apull&service=ghcr.io" | jq -r .token)" https://ghcr.io/v2/cybozu/$1/tags/list | jq -r '.tags[]' | sort -Vr | head -n 1))
 endef
 
 .PHONY: gh
