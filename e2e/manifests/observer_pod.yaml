@@ -9,5 +9,5 @@ spec:
     runAsGroup: 10000
   containers:
     - name: test
-      image: quay.io/cybozu/ubuntu:22.04
+      image: ghcr.io/cybozu/ubuntu:22.04
       command: ["pause"]
