@@ -3,5 +3,5 @@ resources:
   - deployment.yaml
   - service.yaml
 images:
-  - name: quay.io/cybozu/pushgateway
-    newTag: 1.5.1.1
+  - name: ghcr.io/cybozu/pushgateway
+    newTag: 1.6.0.3
