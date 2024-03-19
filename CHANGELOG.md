@@ -5,11 +5,19 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] 2024-03-19
+
+### Changed
+
+- Migrate to ghcr.io [#5](https://github.com/cybozu-go/zombie-detector/pull/5)
+- Support k8s 1.28 [#6](https://github.com/cybozu-go/zombie-detector/pull/6)
+
 ## [0.1.0] 2023-06-20
 
 ### Added
 
 - first implementation completed [#1](https://github.com/cybozu-go/zombie-detector/pull/1)
 
-[Unreleased]: https://github.com/cybozu-go/neco-template/compare/v0.1.0...HEAD
-[Unreleased]: https://github.com/cybozu-go/neco-template/compare/4b825dc642cb6eb9a060e54bf8d69288fbee4904...v0.1.0
+[Unreleased]: https://github.com/cybozu-go/zombie-detector/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/cybozu-go/zombie-detector/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/cybozu-go/zombie-detector/compare/6d8c07c2507ed029b844e371de8faad79ad18ab9...v0.1.0
