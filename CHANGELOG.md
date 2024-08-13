@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+- Support k8s 1.30 [#10](https://github.com/cybozu-go/zombie-detector/pull/10)
+
 ## [0.3.0] 2024-05-30
 
 ### Changed
