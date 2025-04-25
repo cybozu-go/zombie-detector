@@ -108,7 +108,7 @@ var _ = Describe("zombie-detector e2e test", func() {
 		Expect(err).NotTo(HaveOccurred())
 		index, err := returnZombieDetectorMetricsIndex(*res)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(len(res.Data[index].ZombieDurationHours.Metrics)).To(Equal(3))
+		Expect(len(res.Data[index].ZombieDurationSeconds.Metrics)).To(Equal(3))
 	})
 
 	It("should not detect anything again", func() {
@@ -196,7 +196,7 @@ type Response struct {
 		Labels struct {
 			Job string `json:"job"`
 		} `json:"labels"`
-		ZombieDurationHours struct {
+		ZombieDurationSeconds struct {
 			Metrics []struct {
 				Labels struct {
 					APIVersion string    `json:"apiVersion"`
@@ -209,6 +209,6 @@ type Response struct {
 				} `json:"labels"`
 				Value string `json:"value"`
 			} `json:"metrics"`
-		} `json:"zombie_duration_hours,omitempty"`
+		} `json:"zombie_duration_seconds,omitempty"`
 	} `json:"data"`
 }
