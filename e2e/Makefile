@@ -40,6 +40,7 @@ start:
 	$(KUSTOMIZE) build ../config/namespace | $(KUBECTL) apply -f -
 	$(KUSTOMIZE) build ../config/rbac | $(KUBECTL) apply -f -
 	$(KUSTOMIZE) build ./manifests/pushgateway | $(KUBECTL) apply -f -
+	$(KUSTOMIZE) build ./manifests/metrics-server | $(KUBECTL) apply -f -
 
 
 

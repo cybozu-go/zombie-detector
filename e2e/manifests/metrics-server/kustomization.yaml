@@ -1,0 +1,4 @@
+resources:
+  - components.yaml
+patches:
+  - path: patch.yaml

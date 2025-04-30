@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -53,6 +54,19 @@ type resourceMetadata struct {
 	deletionTimestamp *metav1.Time
 }
 
+var IgnoreResources = []schema.GroupVersionResource{
+	{
+		Group:    "metrics.k8s.io",
+		Version:  "v1beta1",
+		Resource: "pods",
+	},
+	{
+		Group:    "metrics.k8s.io",
+		Version:  "v1beta1",
+		Resource: "nodes",
+	},
+}
+
 func getAllResources(ctx context.Context, config *rest.Config) ([]resourceMetadata, error) {
 	o, err := discovery.NewDiscoveryClientForConfig(config)
 	if err != nil {
@@ -74,6 +88,12 @@ func getAllResources(ctx context.Context, config *rest.Config) ([]resourceMetada
 		}
 		for _, resource := range resList.APIResources {
 			groupResourceDef := schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: resource.Name}
+			for _, ir := range IgnoreResources {
+				if ir == groupResourceDef {
+					fmt.Printf("ignoring %s %s %s\n", groupResourceDef.Group, groupResourceDef.Version, groupResourceDef.Resource)
+					continue
+				}
+			}
 			listResponse, err := dynamicClient.Resource(groupResourceDef).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 			statusErr := &apierrors.StatusError{}
 			if err != nil && !errors.As(err, &statusErr) {
@@ -149,7 +169,7 @@ func postZombieResourcesMetrics(zombieResources []resourceMetadata, endpoint str
 	gauges := make([]prometheus.Gauge, 0)
 	for _, res := range zombieResources {
 		gauge := prometheus.NewGauge(prometheus.GaugeOpts{
-			Name: "zombie_duration_hours",
+			Name: "zombie_duration_seconds",
 			Help: "zombie detector zombie duration",
 			ConstLabels: map[string]string{
 				"apiVersion": res.version,
