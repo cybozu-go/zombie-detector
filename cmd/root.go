@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -18,7 +19,6 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
-	metrics "k8s.io/metrics/pkg/apis/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
@@ -56,14 +56,14 @@ type resourceMetadata struct {
 
 var IgnoreResources = []schema.GroupVersionResource{
 	{
-		Group:    metrics.SchemeGroupVersion.Group,
-		Version:  metrics.SchemeGroupVersion.Version,
-		Resource: "PodMetrics",
+		Group:    "metrics.k8s.io",
+		Version:  "v1beta1",
+		Resource: "pods",
 	},
 	{
-		Group:    metrics.SchemeGroupVersion.Group,
-		Version:  metrics.SchemeGroupVersion.Version,
-		Resource: "NodeMetrics",
+		Group:    "metrics.k8s.io",
+		Version:  "v1beta1",
+		Resource: "nodes",
 	},
 }
 
@@ -88,9 +88,9 @@ func getAllResources(ctx context.Context, config *rest.Config) ([]resourceMetada
 		}
 		for _, resource := range resList.APIResources {
 			groupResourceDef := schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: resource.Name}
-			//skip if resource is in the ignore list
 			for _, ir := range IgnoreResources {
 				if ir == groupResourceDef {
+					fmt.Printf("ignoring %s %s %s\n", groupResourceDef.Group, groupResourceDef.Version, groupResourceDef.Resource)
 					continue
 				}
 			}

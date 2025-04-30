@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -26,6 +27,9 @@ var _ = Describe("zombie-detector e2e test", func() {
 		By("waiting for job to be completed")
 		Eventually(func() error {
 			res, err := kubectl(nil, "get", "job", "zombie-detector-immediate-job", "-n", "zombie-detector", "-o", "json")
+			if err != nil {
+				return err
+			}
 			job := batchv1.Job{}
 			err = json.Unmarshal(res, &job)
 			if err != nil {
@@ -40,6 +44,26 @@ var _ = Describe("zombie-detector e2e test", func() {
 		res, err := getMetricsFromPushgateway()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(res.Data).To(BeEmpty())
+	})
+
+	It("should skipping ignored resources", func() {
+		By("creating job from cronjob")
+		_, err := kubectl(nil, "create", "job", "zombie-detector-immediate-job", "-n", "zombie-detector", "--from=cronjob/zombie-detector-cronjob")
+		Expect(err).NotTo(HaveOccurred())
+		By("waiting for job to be completed")
+		Eventually(func() error {
+			res, err := kubectl(nil, "logs", "job/zombie-detector-immediate-job", "-n", "zombie-detector")
+			if err != nil {
+				return err
+			}
+			if !strings.Contains(string(res), "ignoring metrics.k8s.io v1beta1 pods") {
+				return fmt.Errorf("metrics.k8s.io v1beta1 pods is not ignored")
+			}
+			if !strings.Contains(string(res), "ignoring metrics.k8s.io v1beta1 nodes") {
+				return fmt.Errorf("metrics.k8s.io v1beta1 nodes is not ignored")
+			}
+			return nil
+		}).Should(Succeed())
 	})
 
 	It("should detect zombie resources", func() {
