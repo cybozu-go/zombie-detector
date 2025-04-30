@@ -41,7 +41,7 @@ It should look like:
 2. Make a branch to release
 
     ```console
-    $ git neco dev "bump-$VERSION"
+    $ git checkout -b "bump-$VERSION"
     ```
 
 3. Update files listed below for the new version.
@@ -53,7 +53,7 @@ It should look like:
 
     ```console
     $ git commit -a -m "Bump version to $VERSION"
-    $ git neco review
+    $ gh pr create -f
     ```
 
 6. Merge this branch.
