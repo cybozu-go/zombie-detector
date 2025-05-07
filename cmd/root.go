@@ -27,7 +27,7 @@ var (
 		Use:     "zombie-detector",
 		Short:   "zombie-detector detects longly undeleted kubernetes resources",
 		RunE:    rootMain,
-		Version: "1.0.0",
+		Version: "1.0.1",
 	}
 )
 
