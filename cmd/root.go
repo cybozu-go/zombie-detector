@@ -86,12 +86,13 @@ func getAllResources(ctx context.Context, config *rest.Config) ([]resourceMetada
 		if err != nil {
 			gv = schema.GroupVersion{}
 		}
+	L:
 		for _, resource := range resList.APIResources {
 			groupResourceDef := schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: resource.Name}
 			for _, ir := range IgnoreResources {
 				if ir == groupResourceDef {
 					fmt.Printf("ignoring %s %s %s\n", groupResourceDef.Group, groupResourceDef.Version, groupResourceDef.Resource)
-					continue
+					continue L
 				}
 			}
 			listResponse, err := dynamicClient.Resource(groupResourceDef).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
