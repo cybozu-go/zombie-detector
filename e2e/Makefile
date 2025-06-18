@@ -99,7 +99,7 @@ update-tools-version: login-gh
 
 	$(call get-latest-gh-package-tag,pushgateway)
 	NEW_VERSION=$$(echo $(latest_tag)); \
-	sed -i -e "s/PUSHGATEWAY_IMAGE_VERSION := .*/PUSHGATEWAY_IMAGE_VERSION := $${NEW_VERSION}/g" Makefile.versions
+	$(YQ) -i "(.images[] | select(.name==\"ghcr.io/cybozu/pushgateway\")).newTag = \"$(latest_tag)\"" manifests/pushgateway/kustomization.yaml
 
 # usage get-latest-gh OWNER/REPO
 define get-latest-gh

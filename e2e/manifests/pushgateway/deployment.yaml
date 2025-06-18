@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: pushgateway
-        image: ghcr.io/cybozu/pushgateway:1.6.0.3
+        image: ghcr.io/cybozu/pushgateway
         ports:
         - containerPort: 9091
         livenessProbe:
