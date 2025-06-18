@@ -38,8 +38,7 @@ docker-build:
 
 .PHONY: maintenance
 maintenance: update-tools-versions update-actions
-	$(MAKE) -C ./e2e update-tools-version
-	$(MAKE) -C ./e2e/manifests/metrics-server update-manifests
+	$(MAKE) -C ./e2e maintenance
 
 .PHONY: update-tools-versions
 update-tools-versions: login-gh
