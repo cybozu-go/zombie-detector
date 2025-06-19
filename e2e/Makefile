@@ -83,6 +83,9 @@ $(KUBECTL): $(BIN_DIR)
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
+.PHONY: maintenance
+maintenance: update-tools-version update-pushgateway update-metrics-server
+
 .PHONY: update-tools-version
 update-tools-version: login-gh
 	$(call get-latest-gh,kubernetes-sigs/kind)
@@ -97,9 +100,16 @@ update-tools-version: login-gh
 	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2-); \
 	sed -i -e "s/YQ_VERSION := .*/YQ_VERSION := $${NEW_VERSION}/g" Makefile.versions
 
+.PHONY: update-pushgateway
+update-pushgateway: login-gh
 	$(call get-latest-gh-package-tag,pushgateway)
 	NEW_VERSION=$$(echo $(latest_tag)); \
 	$(YQ) -i "(.images[] | select(.name==\"ghcr.io/cybozu/pushgateway\")).newTag = \"$(latest_tag)\"" manifests/pushgateway/kustomization.yaml
+
+.PHONY: update-metrics-server
+update-metrics-server: login-gh
+	curl -sSLf -o manifests/metrics-server/components.yaml \
+		https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
 # usage get-latest-gh OWNER/REPO
 define get-latest-gh
