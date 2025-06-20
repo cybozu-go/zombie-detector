@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
 	"github.com/spf13/cobra"
@@ -122,19 +124,25 @@ func printAllResources(resources []resourceMetadata) {
 	for _, res := range resources {
 		data = append(data, []string{res.version, res.kind, res.name, res.namespace, res.deletionTimestamp.String()})
 	}
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Version", "Kind", "Name", "Namespace", "Timestamp"})
-	table.SetAutoWrapText(false)
-	table.SetAutoFormatHeaders(true)
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderLine(false)
-	table.SetTablePadding("\t")
-	table.SetNoWhiteSpace(true)
-	table.AppendBulk(data)
+	table := tablewriter.NewTable(os.Stdout,
+		tablewriter.WithRenderer(renderer.NewBlueprint(tw.Rendition{
+			Borders: tw.BorderNone,
+			Settings: tw.Settings{
+				Separators: tw.SeparatorsNone,
+				Lines:      tw.LinesNone,
+			},
+		})),
+		tablewriter.WithConfig(tablewriter.Config{
+			Header: tw.CellConfig{
+				Formatting: tw.CellFormatting{Alignment: tw.AlignLeft},
+			},
+			Row: tw.CellConfig{
+				Formatting: tw.CellFormatting{Alignment: tw.AlignLeft},
+			},
+		}),
+	)
+	table.Header("Version", "Kind", "Name", "Namespace", "Timestamp")
+	table.Bulk(data)
 	table.Render()
 }
 
