@@ -5,6 +5,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] 2025-06-24
+
+### Changed
+
+- Support Kubernetes 1.33 [#21](https://github.com/cybozu-go/zombie-detector/pull/21)
+- Refactor makefile and maintenance procedure [#20](https://github.com/cybozu-go/zombie-detector/pull/20)
+- Refactors merics-server's update method [#19](https://github.com/cybozu-go/zombie-detector/pull/19)
+- Updates pushgateway for e2e test and refactors its update method [#18](https://github.com/cybozu-go/zombie-detector/pull/18)
+
 ## [1.0.1] 2025-05-07
 
 ### Changed
@@ -48,7 +57,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - first implementation completed [#1](https://github.com/cybozu-go/zombie-detector/pull/1)
 
-[Unreleased]: https://github.com/cybozu-go/zombie-detector/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/cybozu-go/zombie-detector/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/cybozu-go/zombie-detector/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/cybozu-go/zombie-detector/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/cybozu-go/zombie-detector/compare/v0.5.0...v1.0.0
 [0.5.0]: https://github.com/cybozu-go/zombie-detector/compare/v0.4.0...v0.5.0
