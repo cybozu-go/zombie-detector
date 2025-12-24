@@ -5,6 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Update dependencies in [#23](https://github.com/cybozu-go/zombie-detector/pull/23)
+    - Update modules in go.mod
+    - Use Golang 1.25 for building
+    - Update GitHub Actions
+
 ## [1.1.0] 2025-06-24
 
 ### Changed
