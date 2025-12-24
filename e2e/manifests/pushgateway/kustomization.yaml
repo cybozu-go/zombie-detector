@@ -4,4 +4,4 @@ resources:
   - service.yaml
 images:
   - name: ghcr.io/cybozu/pushgateway
-    newTag: 1.11.0.1
+    newTag: 1.11.2.1
