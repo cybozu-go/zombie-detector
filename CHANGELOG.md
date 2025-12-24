@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] 2025-12-24
+
 ### Changed
 
 - Update dependencies in [#23](https://github.com/cybozu-go/zombie-detector/pull/23)
@@ -64,7 +66,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - first implementation completed [#1](https://github.com/cybozu-go/zombie-detector/pull/1)
 
-[Unreleased]: https://github.com/cybozu-go/zombie-detector/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/cybozu-go/zombie-detector/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/cybozu-go/zombie-detector/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/cybozu-go/zombie-detector/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/cybozu-go/zombie-detector/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/cybozu-go/zombie-detector/compare/v0.5.0...v1.0.0
