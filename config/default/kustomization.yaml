@@ -5,4 +5,4 @@ resources:
 images:
   - name: zombie-detector:dev
     newName: ghcr.io/cybozu-go/zombie-detector
-    newTag: 1.1.1
+    newTag: 1.1.2

@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.2] 2026-02-17
+
 ### Changed
 
 - Update dependencies for Kubernetes 1.34 in [#25](https://github.com/cybozu-go/zombie-detector/pull/25)
@@ -72,7 +74,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - first implementation completed [#1](https://github.com/cybozu-go/zombie-detector/pull/1)
 
-[Unreleased]: https://github.com/cybozu-go/zombie-detector/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/cybozu-go/zombie-detector/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/cybozu-go/zombie-detector/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/cybozu-go/zombie-detector/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/cybozu-go/zombie-detector/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/cybozu-go/zombie-detector/compare/v1.0.0...v1.0.1
