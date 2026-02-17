@@ -1,6 +1,6 @@
 # Update manually
-E2ETEST_K8S_VERSION  := 1.33.7
+E2ETEST_K8S_VERSION  := 1.34.3
 
 # Automatically updated with `make maintenance`.
 KIND_VERSION := 0.31.0
-KUSTOMIZE_VERSION := 5.7.1
+KUSTOMIZE_VERSION := 5.8.1
