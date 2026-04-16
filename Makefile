@@ -23,7 +23,7 @@ test: envtest ## Run tests.
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
 $(ENVTEST): $(BIN_DIR)
-	test -s $@ || GOBIN=$(BIN_DIR) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+	test -s $@ || GOBIN=$(BIN_DIR) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION)
 
 .PHONY: docker-build
 docker-build:
@@ -32,23 +32,10 @@ docker-build:
 .PHONY: maintenance
 maintenance:
 	$(MAKE) update-tools-versions
-	$(MAKE) update-actions
 	$(MAKE) -C ./e2e maintenance
 
 .PHONY: update-tools-versions
 update-tools-versions: login-gh
-	$(call get-latest-gh,actions/cache)
-	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2); \
-	sed -i -e "s/ACTIONS_CACHE_VERSION := .*/ACTIONS_CACHE_VERSION := $${NEW_VERSION}/g" Makefile.versions
-
-	$(call get-latest-gh,actions/checkout)
-	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2); \
-	sed -i -e "s/ACTIONS_CHECKOUT_VERSION := .*/ACTIONS_CHECKOUT_VERSION := $${NEW_VERSION}/g" Makefile.versions
-
-	$(call get-latest-gh,actions/setup-go)
-	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2); \
-	sed -i -e "s/ACTIONS_SETUP_GO_VERSION := .*/ACTIONS_SETUP_GO_VERSION := $${NEW_VERSION}/g" Makefile.versions
-
 	$(call get-latest-gh,cli/cli)
 	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2-); \
 	sed -i -e "s/GH_VERSION := .*/GH_VERSION := $${NEW_VERSION}/g" Makefile.versions
@@ -56,15 +43,6 @@ update-tools-versions: login-gh
 	$(call get-latest-gh,mikefarah/yq)
 	NEW_VERSION=$$(echo $(latest_gh) | cut -b 2-); \
 	sed -i -e "s/YQ_VERSION := .*/YQ_VERSION := $${NEW_VERSION}/g" Makefile.versions
-
-.PHONY: update-actions
-update-actions:
-	$(YQ) -i '(.. | select(has("uses")) | select(.uses | contains("actions/cache"))).uses = "actions/cache@v$(ACTIONS_CACHE_VERSION)"' .github/workflows/ci.yaml
-	$(YQ) -i '(.. | select(has("uses")) | select(.uses | contains("actions/cache"))).uses = "actions/cache@v$(ACTIONS_CACHE_VERSION)"' .github/workflows/release.yaml
-	$(YQ) -i '(.. | select(has("uses")) | select(.uses | contains("actions/checkout"))).uses = "actions/checkout@v$(ACTIONS_CHECKOUT_VERSION)"' .github/workflows/ci.yaml
-	$(YQ) -i '(.. | select(has("uses")) | select(.uses | contains("actions/checkout"))).uses = "actions/checkout@v$(ACTIONS_CHECKOUT_VERSION)"' .github/workflows/release.yaml
-	$(YQ) -i '(.. | select(has("uses")) | select(.uses | contains("actions/setup-go"))).uses = "actions/setup-go@v$(ACTIONS_SETUP_GO_VERSION)"' .github/workflows/ci.yaml
-	$(YQ) -i '(.. | select(has("uses")) | select(.uses | contains("actions/setup-go"))).uses = "actions/setup-go@v$(ACTIONS_SETUP_GO_VERSION)"' .github/workflows/release.yaml
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
