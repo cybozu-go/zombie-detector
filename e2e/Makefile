@@ -72,8 +72,8 @@ $(KIND): $(BIN_DIR)
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE)
 $(KUSTOMIZE): $(BIN_DIR)
-	$(CURL) https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh \
-	| bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(BIN_DIR)
+	$(CURL) https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv$(KUSTOMIZE_VERSION)/kustomize_v$(KUSTOMIZE_VERSION)_$(OS)_$(ARCH).tar.gz | tar -zx -C $(BIN_DIR)
+	chmod +x $@
 
 .PHONY: kubectl
 kubectl: $(KUBECTL)
@@ -107,4 +107,4 @@ update-pushgateway:
 .PHONY: update-metrics-server
 update-metrics-server:
 	$(CURL) -o manifests/metrics-server/components.yaml \
-		https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+		https://github.com/kubernetes-sigs/metrics-server/releases/download/v$(METRICS_SERVER_VERSION)/components.yaml
