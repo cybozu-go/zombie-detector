@@ -14,6 +14,6 @@ This page describes how to update zombie-detector regularly.
    $ # Use this command to list the available k8s versions for envtest
    $ ./bin/setup-envtest list
    ```
-6. Update `E2ETEST_K8S_VERSION` in `e2e/Makefile.versions`.
+6. Update `E2ETEST_K8S_VERSION` and `E2ETEST_KINDEST_NODE_IMAGE_HASH` in `e2e/Makefile.versions`.
    Specify the version of `kindest/node` supported by the kind written in `e2e/Makefile`.
 7. Follow [release.md](/docs/release.md) to update software version.

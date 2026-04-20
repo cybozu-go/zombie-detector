@@ -1,6 +1,6 @@
 # Update manually
 E2ETEST_K8S_VERSION  := 1.35.1
-
+E2ETEST_KINDEST_NODE_IMAGE_HASH := sha256:b08d1f9b5244fb2aae7bea9861c1d372a9535f259efed62a9e92e6b5ab500529
 # Automatically updated with `make maintenance`.
 KIND_VERSION := 0.31.0
 KUSTOMIZE_VERSION := 5.8.1
