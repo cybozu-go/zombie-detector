@@ -27,7 +27,12 @@ $(ENVTEST): $(BIN_DIR)
 
 .PHONY: docker-build
 docker-build:
-	docker build -t zombie-detector:$(TAG) .
+ifneq ($(wildcard $(HOME)/.netrc),)
+	# To pass Takumi Guard credentials, mount the .netrc file to the container if it exists.
+	docker build --build-arg GOPROXY=$(shell go env GOPROXY) --secret id=netrc,src=$(HOME)/.netrc -t zombie-detector:$(TAG) .
+else
+	docker build --build-arg GOPROXY=$(shell go env GOPROXY) -t zombie-detector:$(TAG) .
+endif
 
 .PHONY: maintenance
 maintenance:
