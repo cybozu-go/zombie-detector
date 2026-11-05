@@ -1,5 +1,5 @@
 # Build the zombie-detector binary
-FROM ghcr.io/cybozu/golang:1.26-noble as builder
+FROM ghcr.io/cybozu/golang:1.27-resolute as builder
 ARG TARGETOS
 ARG TARGETARCH
 ARG GOPROXY
