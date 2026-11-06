@@ -1,0 +1,21 @@
+# aqua - Declarative CLI Version Manager
+# https://aquaproj.github.io/
+#
+# gh, yq, kind, kustomize and the standard registry are updated by `make maintenance`.
+# kubectl and setup-envtest are updated manually. See docs/maintenance.md.
+checksum:
+  enabled: true
+  require_checksum: true
+  supported_envs:
+    - darwin
+    - linux
+registries:
+  - type: standard
+    ref: v4.575.0
+packages:
+  - name: cli/cli@v2.103.0
+  - name: mikefarah/yq@v4.54.1
+  - name: kubernetes-sigs/kind@v0.33.0
+  - name: kubernetes-sigs/kustomize@kustomize/v5.8.3
+  - name: kubernetes/kubectl@v1.36.4
+  - name: kubernetes-sigs/controller-runtime/setup-envtest@v0.24.1
