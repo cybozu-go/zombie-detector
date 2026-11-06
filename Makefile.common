@@ -1,11 +1,32 @@
-# These macros are used in Makefile and e2e/Makefile.
+# These settings and macros are used in Makefile and e2e/Makefile.
 
-# usage get-latest-gh OWNER/REPO
+# CLI tools are managed by aqua. See aqua.yaml.
+# They are executed via `aqua exec` with the versions in aqua.yaml, so PATH does not need to be configured.
+GH := aqua exec -- gh
+YQ := aqua exec -- yq
+KIND := aqua exec -- kind
+KUBECTL := aqua exec -- kubectl
+KUSTOMIZE := aqua exec -- kustomize
+SETUP_ENVTEST := aqua exec -- setup-envtest
+
+# Only versions released at least COOLDOWN_DAYS days ago are adopted.
+# In the jq filters below, timestamps are in seconds, so days are converted with 86400 (= 60 * 60 * 24 seconds per day).
+COOLDOWN_DAYS ?= 14
+
+# usage: get-latest-gh OWNER/REPO [TAG_PREFIX]
+# Get the newest release tag (excluding drafts and pre-releases) published at least COOLDOWN_DAYS days ago.
+# If TAG_PREFIX is specified, only tags starting with it are considered.
 define get-latest-gh
-$(eval latest_gh := $(shell $(GH) release list --repo $1 | grep Latest | cut -f3))
+$(eval latest_gh := $(shell $(GH) release list --repo $1 --limit 100 --json tagName,publishedAt,isDraft,isPrerelease \
+	--jq '[.[] | select(.isDraft | not) | select(.isPrerelease | not) | select(.tagName | startswith("$2")) | select((.publishedAt | fromdateiso8601) < (now - $(COOLDOWN_DAYS) * 86400))][0].tagName // empty'))
+$(if $(latest_gh),,$(error failed to get the latest release of $1))
 endef
 
 # usage: get-latest-gh-package-tag NAME
+# Get the newest numeric tag of ghcr.io/cybozu/NAME created at least COOLDOWN_DAYS days ago.
+# The GitHub Packages API requires the read:packages scope.
 define get-latest-gh-package-tag
-$(eval latest_tag := $(shell curl -sSf -H "Authorization: Bearer $(shell curl -sSf "https://ghcr.io/token?scope=repository%3Acybozu%2F$1%3Apull&service=ghcr.io" | jq -r .token)" https://ghcr.io/v2/cybozu/$1/tags/list | jq -r '.tags[]' | sort -Vr | head -n 1))
+$(eval latest_tag := $(shell $(GH) api '/orgs/cybozu/packages/container/$1/versions?per_page=100' \
+	--jq '[.[] | select((.created_at | fromdateiso8601) < (now - $(COOLDOWN_DAYS) * 86400)) | .metadata.container.tags[] | select(test("^[0-9]+(\\.[0-9]+)*$$"))] | sort_by(split(".") | map(tonumber)) | last // empty'))
+$(if $(latest_tag),,$(error failed to get the latest tag of ghcr.io/cybozu/$1. If the token lacks the read:packages scope, run "gh auth refresh -h github.com -s read:packages"))
 endef
