@@ -5,6 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Update dependencies for Kubernetes 1.36 in [#32](https://github.com/cybozu-go/zombie-detector/pull/32)
+    - Update modules in go.mod
+    - Support Kubernetes 1.36
+    - Update Ubuntu to 26.04
+
 ## [1.1.4] 2026-04-27
 
 ### Changed
