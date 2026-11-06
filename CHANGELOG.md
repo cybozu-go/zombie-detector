@@ -11,6 +11,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
     - Update modules in go.mod
     - Support Kubernetes 1.36
     - Update Ubuntu to 26.04
+- Manage CLI tools with aqua and add cooldown period in [#33](https://github.com/cybozu-go/zombie-detector/pull/33)
+    - Manage CLI tools with aqua and verify them with checksums
+    - Adopt only versions released at least 14 days ago in `make maintenance`
 
 ## [1.1.4] 2026-04-27
 
