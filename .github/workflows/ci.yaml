@@ -30,6 +30,9 @@ jobs:
       - uses: flatt-security/setup-takumi-guard-golang@02545d3425218766aac4dca114dcc3f6eaa0df4a # v1.3.0
         with:
           bot-id: ${{ vars.TAKUMI_GUARD_BOT_ID }}
+      - uses: aquaproj/aqua-installer@82d0e83878a8657c4a6f2ff1755d3bfbfc67f329 # v4.1.0
+        with:
+          aqua_version: v2.65.2
       - run: make setup
       - run: make test
   e2e:
@@ -43,6 +46,9 @@ jobs:
       - uses: flatt-security/setup-takumi-guard-golang@02545d3425218766aac4dca114dcc3f6eaa0df4a # v1.3.0
         with:
           bot-id: ${{ vars.TAKUMI_GUARD_BOT_ID }}
+      - uses: aquaproj/aqua-installer@82d0e83878a8657c4a6f2ff1755d3bfbfc67f329 # v4.1.0
+        with:
+          aqua_version: v2.65.2
       - run: make setup
         working-directory: e2e
       - run: make start
